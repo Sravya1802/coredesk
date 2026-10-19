@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# CDK
+infra/cdk.out/
+infra/cdk-outputs.json
+
+# Never commit credentials
+.env
+*.pem
+
+# OS
+.DS_Store

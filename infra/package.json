@@ -1,0 +1,19 @@
+{
+  "name": "coredesk-infra",
+  "version": "1.0.0",
+  "description": "CoreDesk CDK infrastructure",
+  "main": "cdk.out",
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.168.0",
+    "constructs": "10.4.2"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "@types/node": "22.10.5",
+    "ts-node": "10.9.2"
+  }
+}

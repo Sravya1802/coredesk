@@ -1,0 +1,828 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style></head><body><title>CoreDesk Request Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f2f5f6; --surface:#ffffff; --surface-2:#e8edef; --ink:#14212a; --ink-2:#47565f; --ink-3:#6c7a83; --line:#d3dbdf;
+  --accent:#0b6e6e; --accent-ink:#ffffff; --accent-soft:#d9eeed; --bar:#2a78d6; --bar-soft:#cde2fb;
+  --good:#156c40; --good-bg:#dcf1e5; --warn:#855600; --warn-bg:#fbeac4; --crit:#a8231c; --crit-bg:#fbdcd9; --info:#1c5cab; --info-bg:#dae7f8; --mute-bg:#e4e9ec;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1417; --surface:#162026; --surface-2:#1e2a31; --ink:#e8eef0; --ink-2:#b4c0c7; --ink-3:#8796a0; --line:#2b3942;
+  --accent:#4fc1bd; --accent-ink:#06201f; --accent-soft:#12393a; --bar:#3987e5; --bar-soft:#184f95;
+  --good:#74d79d; --good-bg:#133422; --warn:#f0c25f; --warn-bg:#3b2d0b; --crit:#ff938a; --crit-bg:#451a1a; --info:#8dbdf6; --info-bg:#142c47; --mute-bg:#232f36;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0e1417; --surface:#162026; --surface-2:#1e2a31; --ink:#e8eef0; --ink-2:#b4c0c7; --ink-3:#8796a0; --line:#2b3942;
+  --accent:#4fc1bd; --accent-ink:#06201f; --accent-soft:#12393a; --bar:#3987e5; --bar-soft:#184f95;
+  --good:#74d79d; --good-bg:#133422; --warn:#f0c25f; --warn-bg:#3b2d0b; --crit:#ff938a; --crit-bg:#451a1a; --info:#8dbdf6; --info-bg:#142c47; --mute-bg:#232f36;
+  color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100%}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:20px 12px;display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px;display:flex;flex-direction:column;gap:2px}
+.brand b{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--ink-3)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);color:var(--ink-2);text-decoration:none;font-weight:500;white-space:nowrap}
+.nav a:hover{background:var(--surface-2);color:var(--ink)}
+.nav a[aria-current="page"]{background:var(--accent-soft);color:var(--ink)}
+.nav a i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.railnote{margin-top:auto;padding:10px;border:1px dashed var(--line);border-radius:var(--r);font-size:12px;color:var(--ink-2)}
+.main{min-width:0;padding-inline:clamp(16px,3vw,32px);padding-block:22px 48px;display:flex;flex-direction:column;gap:18px}
+.head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h2{margin:0;font-size:15px;font-weight:600}
+.sub{margin:2px 0 0;color:var(--ink-2);max-width:68ch}
+.eyebrow{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kpi{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .v{font-family:var(--mono);font-size:24px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.15}
+.kpi .l{font-size:12px;color:var(--ink-2)}
+.kpi .d{font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+.kpi .d.chg{color:var(--good)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:7px 12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{padding:4px 9px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--mute-bg);color:var(--ink-2)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)} .pill.info{background:var(--info-bg);color:var(--info)}
+.flag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:12px;background:var(--mute-bg);color:var(--ink-2);white-space:nowrap}
+.flag.warn{background:var(--warn-bg);color:var(--warn)} .flag.crit{background:var(--crit-bg);color:var(--crit)}
+.scroll{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
+.id{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.dim{color:var(--ink-3)} .small{font-size:12px}
+input[type=text],input[type=email],input[type=number],input[type=date],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:7px 9px;min-width:0;max-width:100%}
+textarea{resize:vertical;min-height:70px;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12.5px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.bars{display:grid;grid-template-columns:max-content minmax(60px,1fr) max-content;gap:7px 10px;align-items:center;font-size:13px}
+.bars .t{height:14px;position:relative}
+.bars .b{position:absolute;left:0;top:0;bottom:0;background:var(--bar);border-radius:0 4px 4px 0;min-width:2px}
+.bars .br:hover .b{filter:brightness(1.15)}
+.bars .br{display:contents}
+.bars .val{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-2)}
+.bars .lab{color:var(--ink-2)}
+.cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;align-items:end;height:150px;border-bottom:1px solid var(--line)}
+.cols .c{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;min-width:0}
+.cols .c span{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.cols .c div{width:100%;max-width:34px;background:var(--bar);border-radius:4px 4px 0 0}
+.cols .c:hover div{filter:brightness(1.15)}
+.colx{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;font-size:11px;color:var(--ink-3);text-align:center;font-family:var(--mono)}
+.meter{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter.low i{background:var(--warn)}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-2);font-weight:500;min-width:0}
+.form .full{grid-column:1/-1}
+.check{display:flex;flex-direction:column;gap:5px;margin:0;padding:0;list-style:none}
+.check li{display:flex;gap:8px;align-items:baseline}
+.check li b{font-family:var(--mono);font-weight:500;width:1.2em;flex:none}
+.check li.ok b{color:var(--good)} .check li.no b{color:var(--crit)} .check li.no{color:var(--ink)}
+.check li.ok{color:var(--ink-2)}
+.note{font-size:12.5px;color:var(--ink-2);border-left:3px solid var(--line);padding-left:10px}
+.banner{background:var(--accent-soft);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.banner p{margin:0;max-width:62ch}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.result div{border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;background:var(--surface)}
+.result b{font-family:var(--mono);font-size:18px;font-weight:500;display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.18);padding:calc(16px + env(safe-area-inset-top,0px)) 18px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;z-index:10}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;font-size:13px}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.tl li{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px}
+.tl time{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.log li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:9px 14px;border-radius:var(--r);z-index:20;max-width:calc(100% - 32px)}
+.summary{max-width:70ch;display:flex;flex-direction:column;gap:8px}
+.summary p{margin:0}
+/* ── chat panel ─────────────────────────────────────────────────────────── */
+.chat-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;gap:0;overflow:hidden}
+.chat-head{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chat-head h2{margin:0;font-size:14px}
+.chat-log{padding:10px 14px;min-height:90px;max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.chat-log:empty::before{content:"Describe your request in plain English or paste an email and the form will fill itself.";color:var(--ink-3);font-style:italic}
+.bubble{max-width:88%;padding:7px 10px;border-radius:10px;line-height:1.5}
+.bubble.user{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-radius:10px 10px 2px 10px}
+.bubble.bot{align-self:flex-start;background:var(--surface-2);color:var(--ink);border-radius:10px 10px 10px 2px}
+.bubble.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn)}
+.chat-input-row{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px;align-items:flex-end}
+.chat-input-row textarea{flex:1;min-height:36px;max-height:100px;resize:none;padding:6px 8px;font-size:13px}
+/* email modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;width:min(560px,100%);display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h2{margin:0}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{flex-direction:column;gap:10px;padding:12px 16px;border-right:0;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+  .nav{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:2px}
+  .nav a i{display:none}
+  .railnote{display:none}
+  .grid2,.form{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){.bars .b,.meter i{transition:width .3s}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><b>CoreDesk</b><span>Research data requests, intake to billing</span></div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="railnote"><b>Hackathon prototype.</b> All 300 requests are synthetic. No email leaves this page.</div>
+  </aside>
+  <main class="main" id="main"><p style="padding:24px;color:var(--ink-3)">Loading requests…</p></main>
+</div>
+<div id="drawer" class="drawer" hidden role="dialog" aria-label="Request detail"></div>
+<div id="toast" class="toast" hidden role="status"></div>
+<!-- email paste modal -->
+<div id="emailModal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <h2>Paste an email</h2>
+    <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;color:var(--ink-2)">Subject<input type="text" id="emailSubject" placeholder="e.g. Tissue banking request for R01 project" autocomplete="off"></label>
+    <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;color:var(--ink-2)">Body<textarea id="emailBody" style="min-height:140px" placeholder="Paste the body of the email here…"></textarea></label>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="emailCancel">Cancel</button><button class="btn pri" id="emailSend">Extract fields</button></div>
+  </div>
+</div>
+
+<script>
+(async function(){
+
+// ── 1. Load data from API ───────────────────────────────────────────────────
+let rawRows;
+try {
+  const resp = await fetch('/api/requests');
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  rawRows = await resp.json();
+} catch(e) {
+  document.getElementById('main').innerHTML = '<p style="padding:24px;color:var(--crit)">Could not load requests from the server: ' + e.message + '</p>';
+  return;
+}
+
+// Build the RAW structure the rest of the code expects
+const COLS = ["request_id","service_type","requesting_department","pi_name","funding_source","submission_date","sample_count","estimated_cost_usd","actual_cost_usd","required_approvals","approvals_received","days_awaiting_approval","form_completeness_pct","missing_fields_count","manual_follow_ups","tools_used_for_tracking","billing_reconciled","billing_discrepancy_usd","days_to_complete","researcher_notified","report_generated","current_status"];
+const RAW = { cols: COLS, rows: rawRows.map(r => COLS.map(c => r[c] !== undefined ? r[c] : '')) };
+
+// ── 2. Constants & utilities ───────────────────────────────────────────────
+const APPROVERS=['PI sign-off','Fund manager','Department head','IRB / ethics','Core director','Data use agreement'];
+const OPEN=['Pending Approval','On Hold','In Progress'];
+const STATUSES=['Pending Approval','On Hold','In Progress','Completed','Cancelled'];
+const PILL={'Pending Approval':'warn','On Hold':'crit','In Progress':'info','Completed':'good','Cancelled':''};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usd=n=>'$'+Math.round(n).toLocaleString('en-US');
+const usd2=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=n=>Number(n).toLocaleString('en-US');
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const mean=a=>a.length?sum(a)/a.length:0;
+const quant=(a,q)=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),p=(s.length-1)*q,b=Math.floor(p);return s[b]+(s[Math.min(b+1,s.length-1)]-s[b])*(p-b)};
+const median=a=>quant(a,.5);
+const uniq=a=>[...new Set(a)].sort();
+const now=()=>new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+const today=()=>new Date().toISOString().slice(0,10);
+
+const ix={};RAW.cols.forEach((c,i)=>ix[c]=i);
+const reqs=RAW.rows.map(r=>{
+  const need=r[ix.required_approvals],got=r[ix.approvals_received];
+  return {id:r[ix.request_id],service:r[ix.service_type],dept:r[ix.requesting_department],pi:r[ix.pi_name],fund:r[ix.funding_source],
+    date:r[ix.submission_date],samples:r[ix.sample_count],est:r[ix.estimated_cost_usd],actual:r[ix.actual_cost_usd],
+    approvals:APPROVERS.slice(0,need).map((n,i)=>({name:n,done:i<got})),
+    wait:r[ix.days_awaiting_approval],pct:r[ix.form_completeness_pct],missing:r[ix.missing_fields_count],followups:r[ix.manual_follow_ups],
+    tools:r[ix.tools_used_for_tracking],reconciled:r[ix.billing_reconciled]==='Yes',disc:r[ix.billing_discrepancy_usd],days:r[ix.days_to_complete],
+    notified:r[ix.researcher_notified]==='Yes',report:r[ix.report_generated]==='Yes',status:r[ix.current_status],events:[],reminded:false,isNew:false};
+});
+const SERVICES=uniq(reqs.map(r=>r.service)),DEPTS=uniq(reqs.map(r=>r.dept)),FUNDS=uniq(reqs.map(r=>r.fund));
+const HIST={};SERVICES.forEach(s=>{const rs=reqs.filter(r=>r.service===s),ps=rs.map(r=>r.est/r.samples),done=rs.filter(r=>r.status==='Completed').map(r=>r.days);
+  HIST[s]={n:rs.length,lo:quant(ps,.25),mid:median(ps),hi:quant(ps,.75),days:median(done),nDone:done.length};});
+
+const state={view:'overview',q:'',fStatus:'',fService:'',fFlag:'',page:0,open:null,tol:50,mins:10,period:'all',ran:null};
+const notifs=[];
+const gap=r=>r.approvals.filter(a=>!a.done).length;
+
+function flags(r){
+  const f=[],g=gap(r),waiting=r.status==='Pending Approval'||r.status==='On Hold';
+  if(g>0&&(r.status==='In Progress'||r.status==='Completed'))f.push({k:'risk',t:'Started without full approval',lvl:'crit'});
+  if(g>0&&waiting)f.push({k:'appr',t:g+' approval'+(g>1?'s':'')+' missing',lvl:'warn'});
+  if(waiting&&r.wait>14)f.push({k:'stall',t:'Waiting '+r.wait+' days',lvl:'warn'});
+  if(OPEN.includes(r.status)&&r.pct<80)f.push({k:'form',t:'Form '+Math.round(r.pct)+'% complete',lvl:'warn'});
+  if(r.status==='Completed'&&!r.reconciled)f.push({k:'bill',t:'Not reconciled',lvl:'warn'});
+  if(r.status==='Completed'&&!r.report)f.push({k:'report',t:'No report',lvl:''});
+  if(r.status!=='Cancelled'&&!r.notified)f.push({k:'notify',t:'Researcher not told',lvl:''});
+  return f;
+}
+const FLAGNAMES={appr:'Approval missing',risk:'Started without full approval',stall:'Waiting over 14 days',form:'Form under 80%',bill:'Not reconciled',notify:'Researcher not told'};
+
+function kpis(){
+  const c=k=>reqs.filter(r=>flags(r).some(f=>f.k===k)).length;
+  const un=reqs.filter(r=>r.status==='Completed'&&!r.reconciled);
+  return {open:reqs.filter(r=>OPEN.includes(r.status)).length,appr:c('appr'),risk:c('risk'),notify:c('notify'),bill:un.length,billAmt:sum(un.map(r=>r.disc)),report:c('report')};
+}
+const BASE=kpis();
+
+function notify(r,to,subject,rule){notifs.unshift({t:now(),to,subject,id:r.id,rule});}
+function event(r,x){r.events.unshift({t:now(),x});}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600);}
+
+/* ---------- actions ---------- */
+function remind(r){
+  const pend=r.approvals.filter(a=>!a.done).map(a=>a.name);
+  if(!pend.length)return 0;
+  notify(r,pend.join(', '),'Approval needed for '+r.id+' ('+r.service+')','Approval outstanding');
+  event(r,'Reminder sent to '+pend.join(', '));r.reminded=true;return 1;
+}
+function tellResearcher(r,subject,rule){notify(r,r.pi,subject,rule);r.notified=true;}
+function approveNext(r){
+  const a=r.approvals.find(x=>!x.done);if(!a)return;
+  a.done=true;event(r,a.name+' recorded');
+  if(gap(r)===0&&(r.status==='Pending Approval'||r.status==='On Hold')){
+    r.status='In Progress';event(r,'All approvals in. Status moved to In Progress automatically');
+    tellResearcher(r,r.id+' is approved and work has started','Status changed');
+  }
+}
+function complete(r){
+  r.status='Completed';if(!r.actual)r.actual=r.est;if(!r.days)r.days=HIST[r.service].days;
+  r.report=true;event(r,'Marked completed. Charge of '+usd2(r.actual)+' posted and report generated');
+  tellResearcher(r,r.id+' is complete. Charge summary attached','Work completed');
+}
+function reconcile(r,auto){
+  r.reconciled=true;event(r,(auto?'Auto-reconciled':'Reconciled')+(r.disc>0?' with a '+usd2(r.disc)+' adjustment line':''));
+}
+function runAutomation(){
+  const out={reminders:0,told:0,recon:0,review:0,reports:0};
+  reqs.forEach(r=>{
+    if(OPEN.includes(r.status)&&gap(r)>0&&!r.reminded)out.reminders+=remind(r);
+    if(r.status!=='Cancelled'&&!r.notified){tellResearcher(r,'Status update for '+r.id+': '+r.status,'Status changed');event(r,'Researcher sent current status');out.told++;}
+    if(r.status==='Completed'&&!r.reconciled){
+      if(r.disc<=state.tol){reconcile(r,true);out.recon++;}
+      else{out.review++;if(!r.flagged){r.flagged=true;notify(r,'Billing reviewer',r.id+' is off by '+usd2(r.disc)+'. Review needed','Discrepancy over tolerance');event(r,'Sent to billing review: discrepancy over '+usd(state.tol));}}
+    }
+    if(r.status==='Completed'&&!r.report){r.report=true;event(r,'Completion report generated');out.reports++;}
+  });
+  state.ran=out;toast('Automation run finished');
+}
+
+/* ---------- small renderers ---------- */
+const pill=s=>'<span class="pill '+PILL[s]+'">'+esc(s)+'</span>';
+function bars(items,fmt){
+  const max=Math.max(...items.map(i=>i.v),0)||1;
+  return '<div class="bars">'+items.map(i=>'<div class="br" title="'+esc(i.l+': '+fmt(i.v)+(i.tip?' · '+i.tip:''))+'"><span class="lab">'+esc(i.l)+'</span><span class="t"><span class="b" style="width:'+(i.v/max*100).toFixed(1)+'%"></span></span><span class="val">'+fmt(i.v)+'</span></div>').join('')+'</div>';
+}
+function kpi(v,l,d,chg){return '<div class="kpi"><span class="v">'+v+'</span><span class="l">'+l+'</span>'+(d?'<span class="d'+(chg?' chg':'')+'">'+d+'</span>':'')+'</div>';}
+const was=(cur,base)=>cur!==base?['was '+num(base),true]:['',false];
+function opts(list,sel,first){return (first!==undefined?'<option value="">'+first+'</option>':'')+list.map(o=>'<option'+(o===sel?' selected':'')+'>'+esc(o)+'</option>').join('');}
+
+/* ---------- views ---------- */
+function vOverview(){
+  const k=kpis();
+  const buckets=[['Under 70% complete',r=>r.pct<70],['70 to 80%',r=>r.pct>=70&&r.pct<80],['80 to 90%',r=>r.pct>=80&&r.pct<90],['90% and up',r=>r.pct>=90]].map(([l,f])=>{const rs=reqs.filter(r=>!r.isNew&&f(r));return {l,n:rs.length,wait:mean(rs.map(r=>r.wait)),fu:mean(rs.map(r=>r.followups))};});
+  const lo=buckets[0],hi=buckets[3];
+  const fuTotal=sum(reqs.map(r=>r.followups));
+  const ran=state.ran;
+  const w=(a,b)=>{const [d,c]=was(a,b);return [d,c];};
+  return '<div class="head"><div><h1>Where the backlog stands</h1><p class="sub">'+num(reqs.length)+' requests submitted Oct 2025 to Sep 2026 across '+SERVICES.length+' core services.</p></div></div>'
+  +'<div class="kpis">'
+  +kpi(num(k.open),'Open requests','')
+  +kpi(num(k.appr),'Waiting on an approval',ran&&ran.reminders?num(ran.reminders)+' reminders sent':'',!!(ran&&ran.reminders))
+  +kpi(num(k.risk),'Started without full approval','')
+  +kpi(num(k.notify),'Researchers not told status',...w(k.notify,BASE.notify))
+  +kpi(num(k.bill),'Completed, not reconciled',k.bill!==BASE.bill?'was '+num(BASE.bill):usd(k.billAmt)+' in discrepancies',k.bill!==BASE.bill)
+  +kpi(num(k.report),'Completed, no report',...w(k.report,BASE.report))
+  +'</div>'
+  +'<div class="banner"><div><h2>Run the rules on the whole backlog</h2><p class="small">Reminds approvers, tells researchers their status, reconciles charges within tolerance, and generates missing reports. Simulated: nothing is emailed.</p></div>'
+  +'<div class="row"><label class="small">Billing tolerance <select id="tol">'+[25,50,100,250].map(t=>'<option value="'+t+'"'+(t===state.tol?' selected':'')+'>$'+t+'</option>').join('')+'</select></label><button class="btn pri" data-act="run">Run automation</button></div></div>'
+  +(ran?'<div class="result"><div><b>'+num(ran.reminders)+'</b>approval reminders sent</div><div><b>'+num(ran.told)+'</b>researchers told their status</div><div><b>'+num(ran.recon)+'</b>charges auto-reconciled</div><div><b>'+num(ran.review)+'</b>charges sent to review</div><div><b>'+num(ran.reports)+'</b>reports generated</div></div>':'')
+  +'<div class="grid2">'
+  +'<section class="panel"><h2>Requests by status</h2>'+bars(STATUSES.map(s=>({l:s,v:reqs.filter(r=>r.status===s).length})),num)+'</section>'
+  +'<section class="panel"><h2>Manual chasing logged so far</h2><div class="row"><span class="kpi" style="padding:0;background:none"><span class="v">'+num(fuTotal)+'</span><span class="l">manual follow-ups across all requests</span></span></div>'
+  +'<div class="row small"><label>Minutes per follow-up <select id="mins">'+[5,10,15,20].map(t=>'<option'+(t===state.mins?' selected':'')+'>'+t+'</option>').join('')+'</select></label><span>comes to about <b>'+num(Math.round(fuTotal*state.mins/60))+' staff hours</b></span></div>'
+  +'<p class="note">The minutes figure is an assumption. Set it to what your team actually spends. Staff also tracked each request in '+mean(reqs.map(r=>r.tools)).toFixed(1)+' tools on average.</p></section>'
+  +'</div>'
+  +'<section class="panel"><h2>Incomplete forms are where the time goes</h2><p class="sub">Requests under 70% complete waited '+lo.wait.toFixed(1)+' days on approvals and took '+lo.fu.toFixed(1)+' follow-ups each. Requests at 90% or more waited '+hi.wait.toFixed(1)+' days and took '+hi.fu.toFixed(1)+'.</p>'
+  +'<div class="grid2"><div><div class="eyebrow" style="margin-bottom:8px">Average days waiting on approval</div>'+bars(buckets.map(b=>({l:b.l,v:b.wait,tip:b.n+' requests'})),v=>v.toFixed(1))+'</div>'
+  +'<div><div class="eyebrow" style="margin-bottom:8px">Average manual follow-ups per request</div>'+bars(buckets.map(b=>({l:b.l,v:b.fu,tip:b.n+' requests'})),v=>v.toFixed(1))+'</div></div></section>';
+}
+
+function filtered(){
+  const q=state.q.trim().toLowerCase();
+  return reqs.filter(r=>(!state.fStatus||r.status===state.fStatus)&&(!state.fService||r.service===state.fService)
+    &&(!state.fFlag||flags(r).some(f=>f.k===state.fFlag))
+    &&(!q||(r.id+' '+r.pi+' '+r.dept+' '+r.service+' '+r.fund).toLowerCase().includes(q)));
+}
+function vRequests(){
+  return '<div class="head"><div><h1>Request tracker</h1><p class="sub">One list for every request. Status and flags are worked out from the record, so nobody updates them by hand.</p></div><a class="btn pri" href="#new">New request</a></div>'
+  +'<div class="panel"><div class="row"><input type="text" id="q" placeholder="Search ID, PI, department" value="'+esc(state.q)+'" aria-label="Search" style="flex:1 1 200px">'
+  +'<select id="fStatus" aria-label="Status">'+opts(STATUSES,state.fStatus,'All statuses')+'</select>'
+  +'<select id="fService" aria-label="Service">'+opts(SERVICES,state.fService,'All services')+'</select></div>'
+  +'<div class="chips" role="group" aria-label="Needs attention">'+Object.keys(FLAGNAMES).map(k=>'<button class="chip" data-act="flag" data-k="'+k+'" aria-pressed="'+(state.fFlag===k)+'">'+FLAGNAMES[k]+'</button>').join('')+'</div>'
+  +'<div id="reqtable"></div></div>';
+}
+function reqTable(){
+  const rows=filtered().slice().sort((a,b)=>(b.isNew-a.isNew)||b.date.localeCompare(a.date)),per=20,pages=Math.max(1,Math.ceil(rows.length/per));
+  if(state.page>=pages)state.page=0;
+  const pg=rows.slice(state.page*per,state.page*per+per);
+  return '<div class="scroll"><table><thead><tr><th>Request</th><th>Researcher</th><th>Service</th><th>Status</th><th class="n">Approvals</th><th class="n">Form</th><th class="n">Estimate</th><th>Needs attention</th></tr></thead><tbody>'
+  +(pg.length?pg.map(r=>{const f=flags(r),got=r.approvals.length-gap(r);
+    return '<tr class="click" data-act="open" data-id="'+r.id+'" tabindex="0"><td><span class="id">'+r.id+'</span><div class="small dim">'+r.date+'</div></td><td>'+esc(r.pi)+'<div class="small dim">'+esc(r.dept)+'</div></td><td>'+esc(r.service)+'</td><td>'+pill(r.status)+'</td><td class="n">'+got+' of '+r.approvals.length+'</td><td class="n">'+Math.round(r.pct)+'%</td><td class="n">'+usd(r.est)+'</td><td>'+(f.slice(0,2).map(x=>'<span class="flag '+x.lvl+'">'+esc(x.t)+'</span>').join(' ')+(f.length>2?' <span class="small dim">+'+(f.length-2)+'</span>':'')||'<span class="dim small">Nothing</span>')+'</td></tr>';}).join('')
+    :'<tr><td colspan="8" class="dim">No requests match these filters.</td></tr>')
+  +'</tbody></table></div><div class="row small" style="justify-content:space-between"><span class="dim">'+num(rows.length)+' requests</span><span class="row"><button class="btn sm" data-act="page" data-d="-1"'+(state.page===0?' disabled':'')+'>Previous</button><span>Page '+(state.page+1)+' of '+pages+'</span><button class="btn sm" data-act="page" data-d="1"'+(state.page>=pages-1?' disabled':'')+'>Next</button></span></div>';
+}
+
+function drawer(){
+  const d=$('#drawer'),r=reqs.find(x=>x.id===state.open);
+  if(!r){d.hidden=true;return;}
+  const f=flags(r),g=gap(r);
+  d.hidden=false;
+  d.innerHTML='<div class="row" style="justify-content:space-between"><div><div class="id" style="font-size:15px">'+r.id+'</div>'+pill(r.status)+'</div><button class="btn sm" data-act="close">Close</button></div>'
+  +'<dl class="kv"><dt>Researcher</dt><dd>'+esc(r.pi)+'</dd><dt>Department</dt><dd>'+esc(r.dept)+'</dd><dt>Service</dt><dd>'+esc(r.service)+' · '+r.samples+' samples</dd><dt>Funding</dt><dd>'+esc(r.fund)+'</dd><dt>Submitted</dt><dd>'+r.date+'</dd></dl>'
+  +(f.length?'<div class="chips">'+f.map(x=>'<span class="flag '+x.lvl+'">'+esc(x.t)+'</span>').join('')+'</div>':'')
+  +'<section><h2>Approvals, '+(r.approvals.length-g)+' of '+r.approvals.length+'</h2><ul class="check" style="margin:8px 0">'+r.approvals.map(a=>'<li class="'+(a.done?'ok':'no')+'"><b>'+(a.done?'✓':'○')+'</b>'+esc(a.name)+(a.done?'':' <span class="dim small">outstanding</span>')+'</li>').join('')+'</ul>'
+  +(g>0&&r.status!=='Cancelled'?'<div class="row"><button class="btn sm pri" data-act="approve">Record next approval</button><button class="btn sm" data-act="remind">Send reminder</button></div>':'')+'</section>'
+  +'<section><h2>Form completeness</h2><div class="row" style="margin-top:8px"><div class="meter'+(r.pct<80?' low':'')+'" style="flex:1"><i style="width:'+r.pct+'%"></i></div><span class="id">'+Math.round(r.pct)+'%</span></div><p class="small dim" style="margin:4px 0 0">'+(r.missing?r.missing+' field'+(r.missing>1?'s':'')+' missing':'No fields missing')+(r.isNew?'':' · '+r.followups+' manual follow-ups logged · tracked in '+r.tools+' tools')+'</p></section>'
+  +'<section><h2>Charges</h2><dl class="kv" style="margin-top:8px"><dt>Estimate</dt><dd class="id">'+usd2(r.est)+'</dd><dt>Actual</dt><dd class="id">'+(r.actual?usd2(r.actual):'Not posted')+'</dd><dt>Discrepancy</dt><dd class="id">'+usd2(r.disc)+'</dd><dt>Reconciled</dt><dd>'+(r.reconciled?'Yes':'No')+'</dd><dt>Report</dt><dd>'+(r.report?'Generated':'Not generated')+'</dd></dl>'
+  +'<div class="row" style="margin-top:8px">'+(r.status==='In Progress'?'<button class="btn sm pri" data-act="complete">Mark completed</button>':'')+(r.status==='Completed'&&!r.reconciled?'<button class="btn sm pri" data-act="reconcile">Reconcile</button>':'')+'</div></section>'
+  +'<section><h2>Activity</h2><ul class="tl" style="margin-top:8px">'+r.events.map(e=>'<li><time>'+e.t+'</time><span>'+esc(e.x)+'</span></li>').join('')
+  +'<li><time>'+r.date+'</time><span>Request submitted'+(r.wait&&!r.isNew?', then waited '+r.wait+' days on approvals':'')+'</span></li></ul></section>'
+  +'<p class="note">Approver names are placeholders. The dataset records only how many approvals were required and received.</p>';
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTAKE — form helpers, completeness check, estimate, approvers
+   ══════════════════════════════════════════════════════════════════════════ */
+const fv=()=>{const g=id=>($('#'+id)||{}).value||'';return {pi:g('f-pi'),email:g('f-email'),dept:g('f-dept'),service:g('f-service'),fund:g('f-fund'),grant:g('f-grant'),samples:g('f-samples'),title:g('f-title'),desc:g('f-desc'),human:g('f-human'),dua:g('f-dua'),irb:g('f-irb'),irbexp:g('f-irbexp')};};
+
+function intakeChecks(v){
+  const c=[['Researcher name',v.pi.trim().length>1],['Valid email address',/^\S+@\S+\.\S+$/.test(v.email.trim())],['Department',!!v.dept],['Service',!!v.service],['Funding source',!!v.fund],
+    ['Fund or grant number',v.grant.trim().length>=4],['Sample count above zero',+v.samples>0],['Project title',v.title.trim().length>=5],['Description, 20 characters or more',v.desc.trim().length>=20],['Human-subjects question answered',!!v.human],['Data use agreement signed, or not needed',v.dua==='Signed'||v.dua==='Not needed']];
+  if(v.human==='Yes'){c.push(['IRB protocol number',v.irb.trim().length>=4]);c.push(['IRB approval not expired',!!v.irbexp&&v.irbexp>today()]);}
+  return c;
+}
+function intakeEstimate(v){const h=HIST[v.service],n=+v.samples;if(!h||!(n>0))return null;return {lo:h.lo*n,mid:h.mid*n,hi:h.hi*n,days:h.days,n:h.n,nDone:h.nDone};}
+function intakeApprovers(v,e){
+  const a=['PI sign-off','Fund manager'];
+  if(v.fund==='Internal')a.push('Department head');
+  if(v.human==='Yes')a.push('IRB / ethics');
+  if(e&&e.mid>10000)a.push('Core director');
+  if(v.fund==='Industry')a.push('Data use agreement');
+  return a;
+}
+
+/* ── parseText() — regex fallback reader ─────────────────────────────────── */
+function parseText(text){
+  const t=text||'';
+  const out={};
+  // PI name
+  const piM=t.match(/(?:i(?:'?m| am)|this is|from|researcher[:\s]+|pi[:\s]+)\s+((?:dr\.?\s+)?[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i);
+  if(piM)out.pi=piM[1].trim();
+  // email
+  const emM=t.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  if(emM)out.email=emM[0];
+  // service
+  for(const s of SERVICES){if(t.toLowerCase().includes(s.toLowerCase())){out.service=s;break;}}
+  // department
+  for(const d of DEPTS){if(t.toLowerCase().includes(d.toLowerCase())){out.dept=d;break;}}
+  // funding source
+  const fundMap={nih:'NIH',nsf:'NSF',internal:'Internal',industry:'Industry',foundation:'Foundation',state:'State'};
+  for(const [k,v] of Object.entries(fundMap)){if(new RegExp('\\b'+k+'\\b','i').test(t)){out.fund=v;break;}}
+  // grant number — look for patterns like R01-... or P30-... or just word followed by digits
+  const grantM=t.match(/\b([A-Z]\d{2}[A-Z]{2}\d{6}|[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{3,}|grant\s+(?:number\s+)?([A-Z0-9\-]{4,}))/i);
+  if(grantM)out.grant=(grantM[2]||grantM[1]).trim();
+  // samples
+  const sampM=t.match(/(\d+)\s*(?:samples?|specimens?|slides?|cores?|sections?)/i);
+  if(sampM)out.samples=sampM[1];
+  // human subjects
+  if(/human.{0,20}subject|patient|clinical|irb/i.test(t))out.human='Yes';
+  else if(/\bno\b.{0,20}human|animal|cell\s+line|tissue\s+bank/i.test(t))out.human='No';
+  // DUA
+  if(/dua.{0,20}sign|sign.{0,20}dua|data\s+use.{0,20}sign/i.test(t))out.dua='Signed';
+  else if(/no\s+dua|not\s+needed|not\s+required/i.test(t))out.dua='Not needed';
+  // IRB number
+  const irbM=t.match(/\b(?:irb[-#\s]*)(\d{4}[-\s]\d{4}|\d{6,})/i);
+  if(irbM)out.irb=irbM[1];
+  // IRB expiry
+  const dateM=t.match(/(?:expir(?:es?|ation)|valid\s+(?:through|until)|through|until)\s+([A-Za-z]+\s+\d{1,2},?\s*\d{4}|\d{4}-\d{2}-\d{2})/i);
+  if(dateM){const d=new Date(dateM[1]);if(!isNaN(d))out.irbexp=d.toISOString().slice(0,10);}
+  // title — use subject line if available
+  const titleM=t.match(/(?:title|project|subject)[:\s]+(.{5,80})/i);
+  if(titleM)out.title=titleM[1].replace(/[.\n].*/,'').trim();
+  return out;
+}
+
+/* ── setField() — apply a fields object to the form ─────────────────────── */
+function setField(fields){
+  const map={pi:'f-pi',email:'f-email',dept:'f-dept',service:'f-service',fund:'f-fund',grant:'f-grant',samples:'f-samples',title:'f-title',desc:'f-desc',human:'f-human',dua:'f-dua',irb:'f-irb',irbexp:'f-irbexp'};
+  Object.entries(fields).forEach(([k,v])=>{
+    const el=$('#'+map[k]);
+    if(el&&v!==undefined&&v!==null&&String(v).trim()!==''){
+      el.value=String(v).trim();
+    }
+  });
+  updateIntake();
+}
+
+/* ── chat state ──────────────────────────────────────────────────────────── */
+const chatHistory=[];  // [{role:'user'|'assistant', content:'...'}]
+
+function chatAppend(role,text,cls){
+  const log=$('#chat-log');
+  if(!log)return;
+  const div=document.createElement('div');
+  div.className='bubble '+(cls||role);
+  div.textContent=text;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+}
+
+/* ── chatSend() — main AI chat path ─────────────────────────────────────── */
+async function chatSend(){
+  const inp=$('#chat-input');
+  if(!inp)return;
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  inp.disabled=true;
+  const sendBtn=$('#chat-send');
+  if(sendBtn)sendBtn.disabled=true;
+
+  chatAppend('user',text);
+  chatHistory.push({role:'user',content:text});
+
+  // Show typing indicator
+  const log=$('#chat-log');
+  const typing=document.createElement('div');
+  typing.className='bubble bot';
+  typing.textContent='…';
+  typing.id='chat-typing';
+  if(log){log.appendChild(typing);log.scrollTop=log.scrollHeight;}
+
+  const v=fv();
+  const missing=intakeChecks(v).filter(x=>!x[1]).map(x=>x[0]);
+
+  let fields={},reply='',usedFallback=false;
+  try{
+    const resp=await fetch('/api/intake/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({history:chatHistory,formValues:v,missing})
+    });
+    const data=await resp.json();
+    if(data.aiUnavailable){
+      usedFallback=true;
+      fields=parseText(text);
+      reply=data.fallback||'AI is unavailable. I used the basic reader to fill what I could.';
+    } else {
+      fields=data.fields||{};
+      reply=data.reply||'Done.';
+    }
+  } catch(e){
+    usedFallback=true;
+    fields=parseText(text);
+    reply='AI is unavailable (network error). I used the basic reader to fill what I could.';
+  }
+
+  // Remove typing indicator
+  const t=$('#chat-typing');
+  if(t)t.remove();
+
+  if(usedFallback){
+    chatAppend('assistant',reply,'warn');
+  } else {
+    chatAppend('assistant',reply,'bot');
+  }
+  chatHistory.push({role:'assistant',content:reply});
+
+  if(Object.keys(fields).length>0)setField(fields);
+
+  if(inp)inp.disabled=false;
+  if(sendBtn)sendBtn.disabled=false;
+  if(inp)inp.focus();
+}
+
+/* ── email intake ────────────────────────────────────────────────────────── */
+async function runEmailIntake(subject,body){
+  const log=$('#chat-log');
+  if(log){
+    const div=document.createElement('div');
+    div.className='bubble user';
+    div.textContent='[Email] '+subject;
+    log.appendChild(div);
+    const typing2=document.createElement('div');
+    typing2.className='bubble bot';
+    typing2.textContent='Reading email…';
+    typing2.id='chat-typing';
+    log.appendChild(typing2);
+    log.scrollTop=log.scrollHeight;
+  }
+
+  let fields={},draftReply='',usedFallback=false;
+  try{
+    const resp=await fetch('/api/intake/email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({subject,body})
+    });
+    const data=await resp.json();
+    if(data.aiUnavailable){
+      usedFallback=true;
+      fields=parseText(subject+'\n'+body);
+      draftReply='AI unavailable, using basic reader. Please fill in the remaining fields manually.';
+    } else {
+      fields=data.fields||{};
+      draftReply=data.draftReply||'Fields extracted from email.';
+    }
+  } catch(e){
+    usedFallback=true;
+    fields=parseText(subject+'\n'+body);
+    draftReply='AI unavailable (network error), using basic reader.';
+  }
+
+  const t=$('#chat-typing');
+  if(t)t.remove();
+
+  if(usedFallback){
+    chatAppend('assistant',draftReply,'warn');
+  } else {
+    chatAppend('assistant',draftReply,'bot');
+  }
+  // Add the draft reply to chat history so follow-up questions have context
+  chatHistory.push({role:'user',content:'[Email] '+subject+'\n\n'+body});
+  chatHistory.push({role:'assistant',content:draftReply});
+
+  if(Object.keys(fields).length>0)setField(fields);
+}
+
+/* ── sample email for "Try a sample email" button ───────────────────────── */
+const SAMPLE_EMAIL={
+  subject:'Tissue banking request — tumor cohort, NIH R01 project',
+  body:`Hi,
+
+I'm Dr. Sarah Chen from the College of Medicine. My email is s.chen@example.edu.
+
+We need 40 banked tumor tissue samples with matched normal tissue for a pilot cohort study on treatment resistance biomarkers. This is for our NIH-funded R01 project. The samples will involve human subjects and we have an active IRB protocol (2024-1105).
+
+Could you let me know availability and pricing?
+
+Thanks,
+Dr. Sarah Chen
+College of Medicine`
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   vNew() — New Request page with chat panel above the form
+   ═══════════════════════════════════════════════════════════════════════════ */
+function vNew(){
+  return '<div class="head"><div><h1>New request</h1><p class="sub">Describe your request in plain English, paste an email, or fill the form directly. The form checks itself as you type.</p></div>'
+  +'<div class="row"><button class="btn sm" data-act="ex" data-k="bad">Load an incomplete example</button><button class="btn sm" data-act="ex" data-k="good">Load a complete example</button></div></div>'
+  // ── chat panel ──
+  +'<div class="chat-panel">'
+  +'<div class="chat-head"><h2>Start from a message or an email</h2>'
+  +'<div class="row"><button class="btn sm" id="btn-sample-email" data-act="sampleemail">Try a sample email</button>'
+  +'<button class="btn sm" id="btn-paste-email" data-act="pasteemail">Paste an email</button></div></div>'
+  +'<div class="chat-log" id="chat-log"></div>'
+  +'<div class="chat-input-row">'
+  +'<textarea id="chat-input" placeholder="Describe your request… e.g. \'I need 40 tissue samples for my NIH R01 project\'" rows="2"></textarea>'
+  +'<button class="btn pri" id="chat-send" data-act="chatsend">Send</button>'
+  +'</div></div>'
+  // ── form + completeness sidebar ──
+  +'<div class="grid2"><form class="panel" id="intake" novalidate><div class="form">'
+  +'<label>Researcher (PI) name<input type="text" id="f-pi" autocomplete="off"></label>'
+  +'<label>Email<input type="email" id="f-email" autocomplete="off"></label>'
+  +'<label>Department<select id="f-dept">'+opts(DEPTS,'','Choose')+'</select></label>'
+  +'<label>Service<select id="f-service">'+opts(SERVICES,'','Choose')+'</select></label>'
+  +'<label>Funding source<select id="f-fund">'+opts(FUNDS,'','Choose')+'</select></label>'
+  +'<label>Fund or grant number<input type="text" id="f-grant" autocomplete="off"></label>'
+  +'<label>Sample count<input type="number" id="f-samples" min="1"></label>'
+  +'<label>Human-subjects samples?<select id="f-human">'+opts(['No','Yes'],'','Choose')+'</select></label>'
+  +'<label>Data use agreement<select id="f-dua">'+opts(['Signed','Not signed yet','Not needed'],'','Choose')+'</select></label>'
+  +'<label class="full">Project title<input type="text" id="f-title" autocomplete="off"></label>'
+  +'<label class="full">What do you need?<textarea id="f-desc"></textarea></label>'
+  +'<label id="irbA" hidden>IRB protocol number<input type="text" id="f-irb" autocomplete="off"></label>'
+  +'<label id="irbB" hidden>IRB approval expires<input type="date" id="f-irbexp"></label>'
+  +'</div><div class="row"><button class="btn pri" type="submit" id="f-submit">Submit request</button><span class="small dim" id="f-hint"></span></div></form>'
+  +'<aside class="panel" id="intakeSide"></aside></div>';
+}
+
+function updateIntake(){
+  if(!$('#intake'))return;
+  const v=fv(),c=intakeChecks(v),ok=c.filter(x=>x[1]).length,pct=Math.round(ok/c.length*100),e=intakeEstimate(v),ap=intakeApprovers(v,e);
+  $('#irbA').hidden=$('#irbB').hidden=v.human!=='Yes';
+  $('#f-submit').disabled=ok<c.length;
+  $('#f-hint').textContent=ok<c.length?(c.length-ok)+' item'+(c.length-ok>1?'s':'')+' left before this can be submitted':'Ready to submit';
+  $('#intakeSide').innerHTML='<h2>Completeness check</h2><div class="row"><div class="meter'+(pct<100?' low':'')+'" style="flex:1"><i style="width:'+pct+'%"></i></div><span class="id">'+pct+'%</span></div>'
+  +'<ul class="check">'+c.map(x=>'<li class="'+(x[1]?'ok':'no')+'"><b>'+(x[1]?'✓':'○')+'</b>'+x[0]+'</li>').join('')+'</ul>'
+  +'<h2>Instant estimate</h2>'+(e?'<div class="row"><span class="kpi" style="padding:0;background:none"><span class="v">'+usd(e.mid)+'</span><span class="l">likely range '+usd(e.lo)+' to '+usd(e.hi)+'</span></span></div><p class="small dim" style="margin:0">From the per-sample price of '+e.n+' past '+esc(v.service)+' requests. Typical turnaround once approved: '+e.days.toFixed(0)+' days ('+e.nDone+' completed).</p>':'<p class="small dim" style="margin:0">Choose a service and sample count to see the cost and turnaround.</p>')
+  +'<h2>Approvals this request will need</h2><ul class="check">'+ap.map(a=>'<li class="ok"><b>·</b>'+a+'</li>').join('')+'</ul><p class="note">Routing rules are examples: internal funds add the department head, human samples add IRB, estimates over $10,000 add the core director, industry funds add a data use agreement review.</p>';
+}
+
+const EX={bad:{pi:'Dr. A. Example',email:'a.example@',dept:'College of Medicine',service:'Tissue Banking',fund:'NIH',grant:'',samples:'40',title:'Tumor tissue cohort',desc:'Need samples',human:'Yes',dua:'Not signed yet',irb:'2024-0871',irbexp:'2026-06-30'},
+  good:{pi:'Dr. A. Example',email:'a.example@example.edu',dept:'College of Medicine',service:'Tissue Banking',fund:'NIH',grant:'R01-EX-000000',samples:'40',title:'Tumor tissue cohort',desc:'Forty banked tumor samples with matched normal tissue for a pilot cohort.',human:'Yes',dua:'Signed',irb:'2024-0871',irbexp:'2027-06-30'}};
+
+function loadEx(k){const m={pi:'f-pi',email:'f-email',dept:'f-dept',service:'f-service',fund:'f-fund',grant:'f-grant',samples:'f-samples',title:'f-title',desc:'f-desc',human:'f-human',dua:'f-dua',irb:'f-irb',irbexp:'f-irbexp'};Object.keys(m).forEach(f=>{$('#'+m[f]).value=EX[k][f];});updateIntake();}
+
+function submitIntake(){
+  const v=fv(),c=intakeChecks(v);if(c.some(x=>!x[1]))return;
+  const e=intakeEstimate(v),ap=intakeApprovers(v,e),n=reqs.length+1;
+  const r={id:'DISR-'+String(n).padStart(5,'0'),service:v.service,dept:v.dept,pi:v.pi.trim(),fund:v.fund,date:today(),samples:+v.samples,est:Math.round(e.mid*100)/100,actual:0,
+    approvals:ap.map(a=>({name:a,done:false})),wait:0,pct:100,missing:0,followups:0,tools:1,reconciled:false,disc:0,days:0,notified:false,report:false,status:'Pending Approval',events:[],reminded:false,isNew:true};
+  reqs.push(r);
+  event(r,'Passed the completeness check. Estimate '+usd2(r.est));
+  notify(r,ap.join(', '),'Approval requested for '+r.id+' ('+r.service+')','Request submitted');event(r,'Approval requests sent to '+ap.length+' approvers');
+  tellResearcher(r,r.id+' received. Estimate '+usd(r.est)+', about '+e.days.toFixed(0)+' days once approved','Request submitted');
+  state.open=r.id;state.fStatus=state.fService=state.fFlag=state.q='';state.page=0;location.hash='requests';render();toast(r.id+' submitted');
+}
+
+/* ---------- billing ---------- */
+function vBilling(){
+  const done=reqs.filter(r=>r.status==='Completed'),un=done.filter(r=>!r.reconciled),within=un.filter(r=>r.disc<=state.tol);
+  const rows=done.slice().sort((a,b)=>(a.reconciled-b.reconciled)||b.disc-a.disc);
+  return '<div class="head"><div><h1>Billing</h1><p class="sub">Charges come from the work already recorded. Small differences clear themselves. Large ones are flagged for a person before the cycle closes.</p></div>'
+  +'<div class="row"><label class="small">Tolerance <select id="tol">'+[25,50,100,250].map(t=>'<option value="'+t+'"'+(t===state.tol?' selected':'')+'>$'+t+'</option>').join('')+'</select></label><button class="btn pri" data-act="autorec"'+(within.length?'':' disabled')+'>Auto-reconcile '+within.length+' within tolerance</button></div></div>'
+  +'<div class="kpis">'+kpi(usd(sum(done.map(r=>r.actual))),'Charged for completed work','against '+usd(sum(done.map(r=>r.est)))+' estimated')
+  +kpi(num(done.length-un.length)+' of '+done.length,'Completed requests reconciled',...was(un.length,BASE.bill).map((x,i)=>i?x:(x?x+' open':'')))
+  +kpi(usd(sum(un.map(r=>r.disc))),'Discrepancy still open','')+kpi(num(un.length-within.length),'Need a person to review','over '+usd(state.tol))+'</div>'
+  +'<div class="grid2"><section class="panel"><h2>Charged for completed work, by funding source</h2>'+bars(FUNDS.map(f=>({l:f,v:sum(done.filter(r=>r.fund===f).map(r=>r.actual)),tip:done.filter(r=>r.fund===f).length+' requests'})).sort((a,b)=>b.v-a.v),usd)+'</section>'
+  +'<section class="panel"><h2>Charged for completed work, by service</h2>'+bars(SERVICES.map(f=>({l:f,v:sum(done.filter(r=>r.service===f).map(r=>r.actual)),tip:done.filter(r=>r.service===f).length+' requests'})).sort((a,b)=>b.v-a.v),usd)+'</section></div>'
+  +'<section class="panel"><h2>Completed requests</h2><div class="scroll"><table><thead><tr><th>Request</th><th>Researcher</th><th>Funding</th><th class="n">Estimate</th><th class="n">Actual</th><th class="n">Discrepancy</th><th>State</th><th></th></tr></thead><tbody>'
+  +rows.map(r=>'<tr><td><a href="#billing" class="id" data-act="open" data-id="'+r.id+'">'+r.id+'</a></td><td>'+esc(r.pi)+'<div class="small dim">'+esc(r.dept)+'</div></td><td>'+esc(r.fund)+'</td><td class="n">'+usd2(r.est)+'</td><td class="n">'+usd2(r.actual)+'</td><td class="n">'+usd2(r.disc)+'</td><td>'+(r.reconciled?'<span class="pill good">Reconciled</span>':(r.disc>state.tol?'<span class="pill crit">Needs review</span>':'<span class="pill warn">Open</span>'))+'</td><td>'+(r.reconciled?'':'<button class="btn sm" data-act="rec1" data-id="'+r.id+'">Reconcile</button>')+'</td></tr>').join('')
+  +'</tbody></table></div></section>';
+}
+
+/* ---------- notifications ---------- */
+function vNotifs(){
+  const rules=[['Request submitted and complete','Researcher and every approver','Confirmation with estimate; approval request'],['Approval still outstanding','Approvers who have not signed','Reminder naming the request and what is needed'],['Status changes','Researcher','New status and what happens next'],['Work completed','Researcher','Completion notice with charge summary'],['Discrepancy over tolerance','Billing reviewer','Request, amount, and a link to review']];
+  return '<div class="head"><div><h1>Notifications</h1><p class="sub">Every message the rules would send, newest first. This is a log only. Nothing is emailed from this prototype.</p></div></div>'
+  +'<section class="panel"><h2>Rules</h2><div class="scroll"><table><thead><tr><th>When</th><th>Who is told</th><th>What they get</th></tr></thead><tbody>'+rules.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody></table></div></section>'
+  +'<section class="panel"><h2>Sent this session, '+num(notifs.length)+'</h2>'+(notifs.length?'<ul class="log">'+notifs.slice(0,150).map(n=>'<li><time class="id dim">'+n.t+'</time><div><div>'+esc(n.subject)+'</div><div class="small dim">To '+esc(n.to)+' · rule: '+esc(n.rule)+'</div></div></li>').join('')+'</ul>'+(notifs.length>150?'<p class="small dim">Showing the newest 150.</p>':''):'<p class="dim" style="margin:0">Nothing sent yet. Run automation on the Overview, submit a request, or act on one in the tracker.</p>')+'</section>';
+}
+
+/* ---------- report ---------- */
+const PERIODS={all:['All 12 months','2025-10-01','2026-09-30'],q4:['Oct to Dec 2025','2025-10-01','2025-12-31'],q1:['Jan to Mar 2026','2026-01-01','2026-03-31'],q2:['Apr to Jun 2026','2026-04-01','2026-06-30'],q3:['Jul to Sep 2026','2026-07-01','2026-09-30']};
+function reportText(){
+  const p=PERIODS[state.period],rs=reqs.filter(r=>!r.isNew&&r.date>=p[1]&&r.date<=p[2]),done=rs.filter(r=>r.status==='Completed'),open=rs.filter(r=>OPEN.includes(r.status)),short=rs.filter(r=>gap(r)>0&&r.status!=='Cancelled'),risk=rs.filter(r=>flags(r).some(f=>f.k==='risk'));
+  const pctOf=(a,b)=>b?Math.round(a/b*100)+'%':'0%';
+  return [p[0]+': '+num(rs.length)+' requests received from '+uniq(rs.map(r=>r.dept)).length+' departments. '+num(done.length)+' completed ('+pctOf(done.length,rs.length)+'), '+num(open.length)+' open, '+num(rs.filter(r=>r.status==='Cancelled').length)+' cancelled.',
+   'Completed work was charged at '+usd(sum(done.map(r=>r.actual)))+' against '+usd(sum(done.map(r=>r.est)))+' estimated. Median turnaround was '+median(done.map(r=>r.days)).toFixed(1)+' days. '+num(done.filter(r=>r.reconciled).length)+' of '+num(done.length)+' completed requests are reconciled.',
+   num(short.length)+' active or completed requests are short at least one approval, and '+num(risk.length)+' of those are already in progress or completed. Average wait on approvals was '+mean(rs.map(r=>r.wait)).toFixed(1)+' days.',
+   'Staff logged '+num(sum(rs.map(r=>r.followups)))+' manual follow-ups, an average of '+mean(rs.map(r=>r.followups)).toFixed(1)+' per request.'];
+}
+function vReport(){
+  const p=PERIODS[state.period],rs=reqs.filter(r=>!r.isNew&&r.date>=p[1]&&r.date<=p[2]);
+  const mo=[];for(let i=0;i<12;i++){const y=i<3?2025:2026,m=(9+i)%12,key=y+'-'+String(m+1).padStart(2,'0');mo.push({l:MONTHS[m],key,v:reqs.filter(r=>!r.isNew&&r.date.startsWith(key)).length});}
+  const mx=Math.max(...mo.map(m=>m.v));
+  const tbl=(key,name)=>{const g=uniq(rs.map(r=>r[key])).map(k=>{const x=rs.filter(r=>r[key]===k),d=x.filter(r=>r.status==='Completed');return {k,n:x.length,d:d.length,o:x.filter(r=>OPEN.includes(r.status)).length,amt:sum(d.map(r=>r.actual)),days:median(d.map(r=>r.days))};}).sort((a,b)=>b.n-a.n);
+    return '<div class="scroll"><table><thead><tr><th>'+name+'</th><th class="n">Requests</th><th class="n">Open</th><th class="n">Completed</th><th class="n">Median days</th><th class="n">Charged</th></tr></thead><tbody>'+g.map(x=>'<tr><td>'+esc(x.k)+'</td><td class="n">'+x.n+'</td><td class="n">'+x.o+'</td><td class="n">'+x.d+'</td><td class="n">'+(x.d?x.days.toFixed(1):'–')+'</td><td class="n">'+usd(x.amt)+'</td></tr>').join('')+'</tbody></table></div>';};
+  return '<div class="head"><div><h1>Leadership report</h1><p class="sub">Volume, turnaround, and who was served, for leadership and the Cancer Center Support Grant. Written from the request records each time it is opened.</p></div>'
+  +'<div class="row"><select id="period" aria-label="Period">'+Object.keys(PERIODS).map(k=>'<option value="'+k+'"'+(k===state.period?' selected':'')+'>'+PERIODS[k][0]+'</option>').join('')+'</select>'
+  +'<button class="btn" data-act="copy">Copy summary</button>'
+  +'<button class="btn" id="btn-ai-summary" data-act="aisummary">Generate AI summary</button></div></div>'
+  +'<section class="panel"><h2>Summary</h2><div class="summary" id="summary">'+reportText().map(t=>'<p>'+esc(t)+'</p>').join('')+'</div>'
+  +'<div id="ai-summary-area"></div>'
+  +'</section>'
+  +'<section class="panel"><h2>Requests submitted per month, Oct 2025 to Sep 2026</h2><div class="cols">'+mo.map(m=>'<div class="c" title="'+m.l+' '+m.key.slice(0,4)+': '+m.v+' requests"><span>'+m.v+'</span><div style="height:'+(m.v/mx*118).toFixed(0)+'px"></div></div>').join('')+'</div><div class="colx">'+mo.map(m=>'<span>'+m.l+'</span>').join('')+'</div></section>'
+  +'<div class="grid2"><section class="panel"><h2>By department</h2>'+tbl('dept','Department')+'</section><section class="panel"><h2>By service</h2>'+tbl('service','Service')+'</section></div>';
+}
+
+/* ── AI report summary handler ───────────────────────────────────────────── */
+async function runAISummary(){
+  const btn=$('#btn-ai-summary');
+  const area=$('#ai-summary-area');
+  if(!area)return;
+  if(btn)btn.disabled=true;
+  area.innerHTML='<p class="small dim" style="margin-top:8px">Generating summary…</p>';
+
+  const p=PERIODS[state.period],rs=reqs.filter(r=>!r.isNew&&r.date>=p[1]&&r.date<=p[2]),done=rs.filter(r=>r.status==='Completed');
+  const figures={
+    period:p[0],total_requests:rs.length,departments:uniq(rs.map(r=>r.dept)).length,
+    completed:done.length,open:rs.filter(r=>OPEN.includes(r.status)).length,cancelled:rs.filter(r=>r.status==='Cancelled').length,
+    total_charged:Math.round(sum(done.map(r=>r.actual))),total_estimated:Math.round(sum(done.map(r=>r.est))),
+    median_turnaround_days:parseFloat(median(done.map(r=>r.days)).toFixed(1)),
+    reconciled:done.filter(r=>r.reconciled).length,
+    approval_gaps:rs.filter(r=>gap(r)>0&&r.status!=='Cancelled').length,
+    avg_wait_days:parseFloat(mean(rs.map(r=>r.wait)).toFixed(1)),
+    total_manual_followups:sum(rs.map(r=>r.followups)),
+    avg_followups_per_request:parseFloat(mean(rs.map(r=>r.followups)).toFixed(1))
+  };
+
+  try{
+    const resp=await fetch('/api/report/summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({figures})});
+    const data=await resp.json();
+    if(data.aiUnavailable||!data.ok){
+      area.innerHTML='<div class="flag warn" style="margin-top:8px;padding:8px 10px;border-radius:var(--r)">AI unavailable: '+esc(data.error||'unknown error')+'</div>';
+    } else {
+      area.innerHTML='<div style="margin-top:12px;padding:12px;background:var(--accent-soft);border:1px solid var(--line);border-radius:var(--r)"><div class="eyebrow" style="margin-bottom:6px">AI summary</div><p style="margin:0;max-width:70ch">'+esc(data.summary)+'</p></div>';
+    }
+  }catch(e){
+    area.innerHTML='<div class="flag warn" style="margin-top:8px;padding:8px 10px;border-radius:var(--r)">AI unavailable: network error</div>';
+  }
+  if(btn)btn.disabled=false;
+}
+
+/* ---------- shell ---------- */
+const VIEWS={overview:['Overview',vOverview],requests:['Requests',vRequests],new:['New request',vNew],billing:['Billing',vBilling],notifications:['Notifications',vNotifs],report:['Report',vReport]};
+function render(){
+  const k=kpis(),counts={requests:reqs.length,billing:k.bill,notifications:notifs.length};
+  $('#nav').innerHTML=Object.keys(VIEWS).map(v=>'<a href="#'+v+'"'+(v===state.view?' aria-current="page"':'')+'>'+VIEWS[v][0]+(counts[v]!==undefined?'<i>'+counts[v]+'</i>':'')+'</a>').join('');
+  $('#main').innerHTML=VIEWS[state.view][1]();
+  if(state.view==='requests')$('#reqtable').innerHTML=reqTable();
+  if(state.view==='new')updateIntake();
+  drawer();
+}
+function route(){const h=location.hash.slice(1);state.view=VIEWS[h]?h:'overview';render();window.scrollTo(0,0);}
+window.addEventListener('hashchange',route);
+
+/* ── email modal helpers ─────────────────────────────────────────────────── */
+function openEmailModal(){
+  const modal=$('#emailModal');
+  if(!modal)return;
+  $('#emailSubject').value='';
+  $('#emailBody').value='';
+  modal.hidden=false;
+  setTimeout(()=>$('#emailSubject').focus(),50);
+}
+function closeEmailModal(){const m=$('#emailModal');if(m)m.hidden=true;}
+function submitEmailModal(){
+  const subject=($('#emailSubject')||{}).value||'';
+  const body=($('#emailBody')||{}).value||'';
+  closeEmailModal();
+  runEmailIntake(subject,body);
+}
+
+/* ── global event delegation ─────────────────────────────────────────────── */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');
+  if(!t)return;
+  const a=t.dataset.act,id=t.dataset.id;
+  const r=reqs.find(x=>x.id===id);
+
+  if(a==='close'){state.open=null;}
+  else if(a==='open'){state.open=id;}
+  else if(a==='run'){runAutomation();}
+  else if(a==='flag'){state.fFlag=state.fFlag===t.dataset.k?'':t.dataset.k;state.page=0;}
+  else if(a==='page'){state.page+=+t.dataset.d;$('#reqtable').innerHTML=reqTable();return;}
+  else if(a==='ex'){loadEx(t.dataset.k);return;}
+  else if(a==='approve'&&r){approveNext(r);toast('Approval recorded');}
+  else if(a==='remind'&&r){remind(r);toast('Reminder logged');}
+  else if(a==='complete'&&r){complete(r);toast(r.id+' completed');}
+  else if((a==='reconcile'||a==='rec1')&&r){reconcile(r,false);toast(r.id+' reconciled');}
+  else if(a==='autorec'){let n=0;reqs.forEach(x=>{if(x.status==='Completed'&&!x.reconciled&&x.disc<=state.tol){reconcile(x,true);n++;}});toast(n+' charges reconciled');}
+  else if(a==='copy'){const txt=reportText().join('\n\n');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Summary copied')).catch(()=>{const s=window.getSelection(),g=document.createRange();g.selectNodeContents($('#summary'));s.removeAllRanges();s.addRange(g);toast('Summary selected. Press copy.');});return;}
+  // ── new chat/email actions ──────────────────────────────────────────────
+  else if(a==='chatsend'){chatSend();return;}
+  else if(a==='pasteemail'){openEmailModal();return;}
+  else if(a==='sampleemail'){
+    // pre-fill and fire the sample email
+    runEmailIntake(SAMPLE_EMAIL.subject,SAMPLE_EMAIL.body);
+    return;
+  }
+  else if(a==='aisummary'){runAISummary();return;}
+  render();
+});
+
+document.addEventListener('click',e=>{
+  if(e.target.id==='emailCancel')closeEmailModal();
+  if(e.target.id==='emailSend')submitEmailModal();
+  if(e.target.id==='emailModal')closeEmailModal(); // click outside
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey&&e.target.id==='chat-input'){e.preventDefault();chatSend();return;}
+  if(e.key==='Escape'&&!$('#emailModal').hidden){closeEmailModal();return;}
+  if(e.key==='Escape'&&state.open){state.open=null;drawer();}
+  if(e.key==='Enter'&&e.target.matches&&e.target.matches('tr.click')){state.open=e.target.dataset.id;drawer();}
+});
+
+document.addEventListener('input',e=>{
+  const id=e.target.id;
+  if(id==='q'){state.q=e.target.value;state.page=0;$('#reqtable').innerHTML=reqTable();}
+  else if(id&&id.startsWith('f-'))updateIntake();
+});
+document.addEventListener('change',e=>{
+  const id=e.target.id,v=e.target.value;
+  if(id==='fStatus'||id==='fService'){state[id]=v;state.page=0;$('#reqtable').innerHTML=reqTable();}
+  else if(id==='tol'){state.tol=+v;render();}
+  else if(id==='mins'){state.mins=+v;render();}
+  else if(id==='period'){state.period=v;render();}
+});
+document.addEventListener('submit',e=>{if(e.target.id==='intake'){e.preventDefault();submitIntake();}});
+
+route();
+})();
+</script>
+</body></html>
